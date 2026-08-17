@@ -1,22 +1,6 @@
-/**
- * Reusable Input Component
- * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
- * 
- * Secure Native Password Handling:
- * - Direct native secureTextEntry support (eliminates length-diff assumptions and middle-string edit corruption)
- * - Dynamic key prop per showPassword state to resolve iOS font reset quirk
- * - Focus preservation via requestAnimationFrame on toggle
- */
-import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TextInputProps,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -32,21 +16,20 @@ export const Input: React.FC<InputProps> = ({
   required = false,
   style,
   editable = true,
-  value,
+  value = '',
   onChangeText,
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(!isPassword);
+  const [showPassword, setShowPassword] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
-    // Preserve focus and keyboard state across secureTextEntry toggle
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
+    requestAnimationFrame(() => inputRef.current?.focus());
   };
+
+  const isMasked = isPassword && !showPassword;
 
   return (
     <View style={styles.container}>
@@ -64,30 +47,43 @@ export const Input: React.FC<InputProps> = ({
           !editable && styles.inputContainerDisabled,
         ]}
       >
-        <TextInput
-          ref={inputRef}
-          key={isPassword ? (showPassword ? 'visible' : 'hidden') : 'input'}
-          style={[styles.input, style]}
-          placeholderTextColor="#9CA3AF"
-          secureTextEntry={isPassword && !showPassword}
-          autoCorrect={false}
-          spellCheck={false}
-          autoCapitalize="none"
-          textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
-          autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
-          value={value}
-          onChangeText={onChangeText}
-          onFocus={(e) => {
-            setIsFocused(true);
-            rest.onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            rest.onBlur?.(e);
-          }}
-          editable={editable}
-          {...rest}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            ref={inputRef}
+            style={[
+              styles.input,
+              isMasked && Boolean(value) && styles.transparentText,
+              style,
+            ]}
+            placeholderTextColor="#9CA3AF"
+            autoCorrect={false}
+            spellCheck={false}
+            autoCapitalize="none"
+            textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
+            autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
+            value={value}
+            onChangeText={onChangeText}
+            onFocus={(e) => {
+              setIsFocused(true);
+              rest.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              rest.onBlur?.(e);
+            }}
+            editable={editable}
+            {...rest}
+          />
+          {/* Zero-Flash Custom Dot Overlay */}
+          {isMasked && Boolean(value) && (
+            <View pointerEvents="none" style={styles.overlayContainer}>
+              <Text style={styles.dotText} numberOfLines={1}>
+                {'•'.repeat(value.length)}
+              </Text>
+            </View>
+          )}
+        </View>
+
         {isPassword && (
           <TouchableOpacity
             onPress={handleTogglePassword}
@@ -96,11 +92,7 @@ export const Input: React.FC<InputProps> = ({
             accessibilityLabel={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
             activeOpacity={0.7}
           >
-            {showPassword ? (
-              <EyeOff size={18} color="#6B7280" />
-            ) : (
-              <Eye size={18} color="#6B7280" />
-            )}
+            {showPassword ? <EyeOff size={18} color="#6B7280" /> : <Eye size={18} color="#6B7280" />}
           </TouchableOpacity>
         )}
       </View>
@@ -143,11 +135,33 @@ const styles = StyleSheet.create({
   inputContainerDisabled: {
     backgroundColor: '#F3F4F6',
   },
-  input: {
+  inputWrapper: {
     flex: 1,
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  input: {
+    width: '100%',
     fontSize: 15,
     color: '#111827',
     paddingVertical: 10,
+  },
+  transparentText: {
+    color: 'transparent',
+  },
+  overlayContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+  },
+  dotText: {
+    fontSize: 15,
+    color: '#111827',
+    letterSpacing: 2,
+    includeFontPadding: false,
   },
   eyeButton: {
     padding: 6,
