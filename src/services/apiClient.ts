@@ -32,7 +32,7 @@ function validateHttps(url?: string): void {
 validateHttps(BASE_URL);
 
 /**
- * Central Axios instance for the entire application
+ * Central Axios instance for the entire application (SEC-6 / DRY)
  */
 export const apiClient = axios.create({
   baseURL: BASE_URL,

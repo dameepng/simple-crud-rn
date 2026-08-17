@@ -15,8 +15,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Button, ConfirmDialog, Toast, ToastType } from '../../../shared/components';
+import { formatDate, getStatusBadgeStyle } from '../../../shared/utils';
 import { leadsService } from '../services/leadsService';
-import { Lead, LeadStatus } from '../../../types/Lead';
+import { Lead } from '../../../types/Lead';
 
 export interface LeadDetailScreenProps {
   lead: Lead;
@@ -24,48 +25,6 @@ export interface LeadDetailScreenProps {
   onDeleteSuccess: () => void;
   onBack: () => void;
 }
-
-const getStatusBadgeStyle = (status: LeadStatus) => {
-  switch (status) {
-    case 'Baru':
-      return {
-        badge: styles.badgeBaru,
-        text: styles.badgeTextBaru,
-      };
-    case 'Diproses':
-      return {
-        badge: styles.badgeDiproses,
-        text: styles.badgeTextDiproses,
-      };
-    case 'Closed':
-      return {
-        badge: styles.badgeClosed,
-        text: styles.badgeTextClosed,
-      };
-    default:
-      return {
-        badge: styles.badgeDefault,
-        text: styles.badgeTextDefault,
-      };
-  }
-};
-
-const formatDate = (dateString?: string): string => {
-  if (!dateString) return '-';
-  try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return dateString;
-    return d.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return dateString;
-  }
-};
 
 export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
   lead,
@@ -194,13 +153,13 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Tanggal Dibuat</Text>
-            <Text style={styles.detailValue}>{formatDate(lead.createdAt)}</Text>
+            <Text style={styles.detailValue}>{formatDate(lead.createdAt, true)}</Text>
           </View>
 
           {lead.updatedAt ? (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Terakhir Diubah</Text>
-              <Text style={styles.detailValue}>{formatDate(lead.updatedAt)}</Text>
+              <Text style={styles.detailValue}>{formatDate(lead.updatedAt, true)}</Text>
             </View>
           ) : null}
         </View>

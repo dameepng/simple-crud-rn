@@ -9,52 +9,13 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { Lead, LeadStatus } from '../../../types/Lead';
+import { Lead } from '../../../types/Lead';
+import { formatDate, getStatusBadgeStyle } from '../../../shared/utils';
 
 export interface LeadCardProps {
   lead: Lead;
   onPress?: (lead: Lead) => void;
 }
-
-const getStatusBadgeStyle = (status: LeadStatus) => {
-  switch (status) {
-    case 'Baru':
-      return {
-        badge: styles.badgeBaru,
-        text: styles.badgeTextBaru,
-      };
-    case 'Diproses':
-      return {
-        badge: styles.badgeDiproses,
-        text: styles.badgeTextDiproses,
-      };
-    case 'Closed':
-      return {
-        badge: styles.badgeClosed,
-        text: styles.badgeTextClosed,
-      };
-    default:
-      return {
-        badge: styles.badgeDefault,
-        text: styles.badgeTextDefault,
-      };
-  }
-};
-
-const formatDate = (dateString?: string): string => {
-  if (!dateString) return '-';
-  try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return dateString;
-    return d.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return dateString;
-  }
-};
 
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onPress }) => {
   const statusStyle = getStatusBadgeStyle(lead.status);
@@ -145,30 +106,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  badgeBaru: {
-    backgroundColor: '#DBEAFE',
-  },
-  badgeTextBaru: {
-    color: '#1D4ED8',
-  },
-  badgeDiproses: {
-    backgroundColor: '#FEF3C7',
-  },
-  badgeTextDiproses: {
-    color: '#B45309',
-  },
-  badgeClosed: {
-    backgroundColor: '#D1FAE5',
-  },
-  badgeTextClosed: {
-    color: '#047857',
-  },
-  badgeDefault: {
-    backgroundColor: '#F3F4F6',
-  },
-  badgeTextDefault: {
-    color: '#4B5563',
   },
   infoSection: {
     marginBottom: 10,

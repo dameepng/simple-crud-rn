@@ -5,23 +5,9 @@
  * - Reuses apiClient instance without creating new axios instances (DRY)
  */
 import { apiClient } from '../../../services/apiClient';
+import { extractData } from '../../../services/apiUtils';
 import { ApiResponse } from '../../../types/Lead';
 import { LoginCredentials, AuthResponse, User } from '../types';
-
-/**
- * Helper to unwrap response payload
- */
-function extractData<T>(responsePayload: ApiResponse<T> | T): T {
-  if (
-    responsePayload &&
-    typeof responsePayload === 'object' &&
-    'data' in responsePayload &&
-    'success' in responsePayload
-  ) {
-    return (responsePayload as ApiResponse<T>).data;
-  }
-  return responsePayload as T;
-}
 
 export const authService = {
   /**
