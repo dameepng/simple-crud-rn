@@ -6,6 +6,7 @@
  * - Implements getLeads, getLeadById, createLead, updateLead, deleteLead
  */
 import { apiClient } from '../../../services/apiClient';
+import { extractData } from '../../../services/apiUtils';
 import {
   Lead,
   CreateLeadDTO,
@@ -13,21 +14,6 @@ import {
   LeadFilterParams,
   ApiResponse,
 } from '../types';
-
-/**
- * Helper to unwrap standard API response envelope or raw payload
- */
-function extractData<T>(responsePayload: ApiResponse<T> | T): T {
-  if (
-    responsePayload &&
-    typeof responsePayload === 'object' &&
-    'data' in responsePayload &&
-    'success' in responsePayload
-  ) {
-    return (responsePayload as ApiResponse<T>).data;
-  }
-  return responsePayload as T;
-}
 
 export const leadsService = {
   /**
