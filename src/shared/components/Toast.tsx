@@ -4,6 +4,7 @@
  */
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react-native';
 
 export type ToastType = 'success' | 'error' | 'info';
 
@@ -54,26 +55,38 @@ export const Toast: React.FC<ToastProps> = ({
 
   if (!visible) return null;
 
+  const renderIcon = () => {
+    switch (type) {
+      case 'error':
+        return <AlertCircle size={20} color="#DC2626" style={styles.icon} />;
+      case 'info':
+        return <Info size={20} color="#2563EB" style={styles.icon} />;
+      case 'success':
+      default:
+        return <CheckCircle2 size={20} color="#059669" style={styles.icon} />;
+    }
+  };
+
   const getStyleByType = () => {
     switch (type) {
       case 'error':
         return {
           container: styles.errorContainer,
           text: styles.errorText,
-          icon: '⚠️',
+          closeColor: '#DC2626',
         };
       case 'info':
         return {
           container: styles.infoContainer,
           text: styles.infoText,
-          icon: 'ℹ️',
+          closeColor: '#2563EB',
         };
       case 'success':
       default:
         return {
           container: styles.successContainer,
           text: styles.successText,
-          icon: '✅',
+          closeColor: '#059669',
         };
     }
   };
@@ -87,13 +100,13 @@ export const Toast: React.FC<ToastProps> = ({
       accessibilityLiveRegion="polite"
     >
       <View style={[styles.container, styleConfig.container]}>
-        <Text style={styles.icon}>{styleConfig.icon}</Text>
+        {renderIcon()}
         <Text style={[styles.message, styleConfig.text]} numberOfLines={3}>
           {message}
         </Text>
         {onDismiss ? (
           <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
-            <Text style={[styles.closeText, styleConfig.text]}>✕</Text>
+            <X size={16} color={styleConfig.closeColor} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -135,7 +148,6 @@ const styles = StyleSheet.create({
     borderColor: '#93C5FD',
   },
   icon: {
-    fontSize: 18,
     marginRight: 10,
   },
   message: {
@@ -156,10 +168,6 @@ const styles = StyleSheet.create({
   closeButton: {
     paddingLeft: 10,
     paddingVertical: 4,
-  },
-  closeText: {
-    fontSize: 14,
-    fontWeight: '700',
   },
 });
 

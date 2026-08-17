@@ -4,6 +4,7 @@
  * - Comprehensive detail view for a single Lead entity
  * - Protected delete workflow requiring explicit user confirmation via ConfirmDialog
  * - Edit trigger and automated list synchronization upon deletion
+ * - Modern Lucide icons
  */
 import React, { useState } from 'react';
 import {
@@ -14,6 +15,17 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  Mail,
+  Phone,
+  Tag,
+  Calendar,
+  Clock,
+  FileText,
+} from 'lucide-react-native';
 import { Button, ConfirmDialog, Toast, ToastType } from '../../../shared/components';
 import { formatDate, getStatusBadgeStyle } from '../../../shared/utils';
 import { leadsService } from '../services/leadsService';
@@ -93,7 +105,8 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
           accessibilityLabel="Kembali ke daftar leads"
           testID="button-detail-back"
         >
-          <Text style={styles.backButtonText}>← Kembali</Text>
+          <ArrowLeft size={20} color="#2563EB" style={styles.backIcon} />
+          <Text style={styles.backButtonText}>Kembali</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detail Prospek</Text>
         <TouchableOpacity
@@ -103,6 +116,7 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
           accessibilityLabel="Edit lead"
           testID="button-header-edit"
         >
+          <Pencil size={16} color="#2563EB" style={styles.headerEditIcon} />
           <Text style={styles.headerEditText}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -126,21 +140,30 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
           <Text style={styles.sectionHeader}>Informasi Kontak</Text>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Email</Text>
+            <View style={styles.labelContainer}>
+              <Mail size={16} color="#6B7280" style={styles.rowIcon} />
+              <Text style={styles.detailLabel}>Email</Text>
+            </View>
             <Text style={styles.detailValue} selectable>
               {lead.email}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Nomor Telepon</Text>
+            <View style={styles.labelContainer}>
+              <Phone size={16} color="#6B7280" style={styles.rowIcon} />
+              <Text style={styles.detailLabel}>Nomor Telepon</Text>
+            </View>
             <Text style={styles.detailValue} selectable>
               {lead.telepon}
             </Text>
           </View>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Sumber Lead</Text>
+            <View style={styles.labelContainer}>
+              <Tag size={16} color="#6B7280" style={styles.rowIcon} />
+              <Text style={styles.detailLabel}>Sumber Lead</Text>
+            </View>
             <View style={styles.sourceTag}>
               <Text style={styles.sourceTagText}>{lead.sumber || '-'}</Text>
             </View>
@@ -152,13 +175,19 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
           <Text style={styles.sectionHeader}>Riwayat</Text>
 
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Tanggal Dibuat</Text>
+            <View style={styles.labelContainer}>
+              <Calendar size={16} color="#6B7280" style={styles.rowIcon} />
+              <Text style={styles.detailLabel}>Tanggal Dibuat</Text>
+            </View>
             <Text style={styles.detailValue}>{formatDate(lead.createdAt, true)}</Text>
           </View>
 
           {lead.updatedAt ? (
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Terakhir Diubah</Text>
+              <View style={styles.labelContainer}>
+                <Clock size={16} color="#6B7280" style={styles.rowIcon} />
+                <Text style={styles.detailLabel}>Terakhir Diubah</Text>
+              </View>
               <Text style={styles.detailValue}>{formatDate(lead.updatedAt, true)}</Text>
             </View>
           ) : null}
@@ -166,7 +195,10 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
 
         {/* Notes Section */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Catatan / Keterangan</Text>
+          <View style={styles.notesHeaderRow}>
+            <FileText size={16} color="#374151" style={styles.rowIcon} />
+            <Text style={styles.sectionHeader}>Catatan / Keterangan</Text>
+          </View>
           <Text style={styles.notesBody}>
             {lead.catatan ? lead.catatan : 'Tidak ada catatan tambahan.'}
           </Text>
@@ -231,8 +263,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 6,
     paddingRight: 12,
+  },
+  backIcon: {
+    marginRight: 4,
   },
   backButtonText: {
     fontSize: 15,
@@ -245,8 +282,13 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   headerEditButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 6,
     paddingLeft: 12,
+  },
+  headerEditIcon: {
+    marginRight: 4,
   },
   headerEditText: {
     fontSize: 15,
@@ -296,30 +338,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
-  badgeBaru: {
-    backgroundColor: '#DBEAFE',
-  },
-  badgeTextBaru: {
-    color: '#1D4ED8',
-  },
-  badgeDiproses: {
-    backgroundColor: '#FEF3C7',
-  },
-  badgeTextDiproses: {
-    color: '#B45309',
-  },
-  badgeClosed: {
-    backgroundColor: '#D1FAE5',
-  },
-  badgeTextClosed: {
-    color: '#047857',
-  },
-  badgeDefault: {
-    backgroundColor: '#F3F4F6',
-  },
-  badgeTextDefault: {
-    color: '#4B5563',
-  },
   sectionCard: {
     backgroundColor: '#FFFFFF',
     padding: 18,
@@ -336,18 +354,30 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 12,
   },
+  notesHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 140,
+  },
+  rowIcon: {
+    marginRight: 8,
+  },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
   detailLabel: {
     fontSize: 14,
     color: '#6B7280',
-    width: 120,
   },
   detailValue: {
     fontSize: 14,

@@ -11,6 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -71,7 +72,11 @@ export const Input: React.FC<InputProps> = ({
             accessibilityLabel={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
             activeOpacity={0.7}
           >
-            <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
+            {showPassword ? (
+              <EyeOff size={18} color="#6B7280" />
+            ) : (
+              <Eye size={18} color="#6B7280" />
+            )}
           </TouchableOpacity>
         )}
       </View>
@@ -121,13 +126,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   eyeButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  eyeText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#2563EB',
+    padding: 6,
   },
   errorText: {
     fontSize: 12,

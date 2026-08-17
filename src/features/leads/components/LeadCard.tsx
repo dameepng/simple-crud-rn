@@ -9,6 +9,14 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import {
+  Mail,
+  Phone,
+  Tag,
+  Calendar,
+  FileText,
+  ChevronRight,
+} from 'lucide-react-native';
 import { Lead } from '../../../types/Lead';
 import { formatDate, getStatusBadgeStyle } from '../../../shared/utils';
 
@@ -33,38 +41,47 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, onPress }) => {
         <Text style={styles.name} numberOfLines={1}>
           {lead.nama}
         </Text>
-        <View style={[styles.badge, statusStyle.badge]}>
-          <Text style={[styles.badgeText, statusStyle.text]}>{lead.status}</Text>
+        <View style={styles.headerRight}>
+          <View style={[styles.badge, statusStyle.badge]}>
+            <Text style={[styles.badgeText, statusStyle.text]}>{lead.status}</Text>
+          </View>
+          <ChevronRight size={16} color="#9CA3AF" />
         </View>
       </View>
 
       <View style={styles.infoSection}>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Email:</Text>
+          <Mail size={14} color="#6B7280" style={styles.infoIcon} />
           <Text style={styles.infoValue} numberOfLines={1}>
             {lead.email}
           </Text>
         </View>
 
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Telepon:</Text>
+          <Phone size={14} color="#6B7280" style={styles.infoIcon} />
           <Text style={styles.infoValue}>{lead.telepon}</Text>
         </View>
 
         {lead.sumber ? (
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Sumber:</Text>
+            <Tag size={13} color="#6B7280" style={styles.infoIcon} />
             <Text style={styles.sourceTag}>{lead.sumber}</Text>
           </View>
         ) : null}
       </View>
 
       <View style={styles.footerRow}>
-        <Text style={styles.dateText}>Dibuat: {formatDate(lead.createdAt)}</Text>
+        <View style={styles.dateContainer}>
+          <Calendar size={12} color="#9CA3AF" style={styles.footerIcon} />
+          <Text style={styles.dateText}>{formatDate(lead.createdAt)}</Text>
+        </View>
         {lead.catatan ? (
-          <Text style={styles.notesText} numberOfLines={1}>
-            📝 {lead.catatan}
-          </Text>
+          <View style={styles.notesContainer}>
+            <FileText size={12} color="#6B7280" style={styles.footerIcon} />
+            <Text style={styles.notesText} numberOfLines={1}>
+              {lead.catatan}
+            </Text>
+          </View>
         ) : null}
       </View>
     </TouchableOpacity>
@@ -91,6 +108,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   name: {
     fontSize: 16,
     fontWeight: '700',
@@ -109,16 +131,14 @@ const styles = StyleSheet.create({
   },
   infoSection: {
     marginBottom: 10,
-    gap: 4,
+    gap: 6,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  infoLabel: {
-    fontSize: 13,
-    color: '#6B7280',
-    width: 65,
+  infoIcon: {
+    marginRight: 8,
   },
   infoValue: {
     fontSize: 13,
@@ -129,7 +149,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#4B5563',
     backgroundColor: '#F3F4F6',
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
   },
@@ -141,6 +161,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  notesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: '60%',
+  },
+  footerIcon: {
+    marginRight: 4,
+  },
   dateText: {
     fontSize: 11,
     color: '#9CA3AF',
@@ -149,7 +181,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     fontStyle: 'italic',
-    maxWidth: '55%',
   },
 });
 

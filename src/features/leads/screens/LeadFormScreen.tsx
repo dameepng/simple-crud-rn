@@ -4,6 +4,7 @@
  * - Screen wrapper invoking reusable LeadForm component
  * - Dispatches createLead / updateLead to leadsService based on mode
  * - Provides Toast feedback for success & failure states
+ * - Modern Lucide icons
  */
 import React, { useState } from 'react';
 import {
@@ -13,6 +14,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeft } from 'lucide-react-native';
 import { LeadForm } from '../components/LeadForm';
 import { leadsService } from '../services/leadsService';
 import { Toast, ToastType } from '../../../shared/components/Toast';
@@ -98,7 +100,8 @@ export const LeadFormScreen: React.FC<LeadFormScreenProps> = ({
           accessibilityLabel="Kembali"
           testID="button-header-back"
         >
-          <Text style={styles.backButtonText}>← Kembali</Text>
+          <ArrowLeft size={20} color="#2563EB" style={styles.backIcon} />
+          <Text style={styles.backButtonText}>Kembali</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {mode === 'create' ? 'Tambah Lead' : 'Edit Lead'}
@@ -142,8 +145,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 6,
     paddingRight: 12,
+  },
+  backIcon: {
+    marginRight: 4,
   },
   backButtonText: {
     fontSize: 15,

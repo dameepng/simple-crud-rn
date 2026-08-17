@@ -4,6 +4,7 @@
  * - Efficient virtualized FlatList for rendering leads
  * - Debounced search bar and status filter bar integration
  * - Pull to refresh & clear empty / error feedback states
+ * - Modern Lucide icons
  */
 import React, { useMemo, useCallback } from 'react';
 import {
@@ -17,6 +18,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import {
+  Search,
+  X,
+  LogOut,
+  Plus,
+  AlertTriangle,
+  SearchX,
+  Users,
+} from 'lucide-react-native';
 import { useLeads } from '../hooks/useLeads';
 import { LeadCard } from '../components/LeadCard';
 import { LeadFilterBar } from '../components/LeadFilterBar';
@@ -48,14 +58,14 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
     debouncedSearchQuery,
   } = useLeads();
 
-  // FR-14: Automatically sync/refresh list when returning from detail/create/edit screen
+  // FR-14 / Checklist 5.3: Automatically refresh list when screen regains focus
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
 
-  // Compute status counts for filter chips
+  // Status counts for badge chips
   const statusCounts = useMemo(() => {
     const counts = {
       Semua: rawLeads.length,
@@ -63,20 +73,21 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
       Diproses: 0,
       Closed: 0,
     };
-    rawLeads.forEach((lead) => {
-      if (lead.status in counts) {
-        counts[lead.status]++;
-      }
+    rawLeads.forEach((item) => {
+      if (item.status === 'Baru') counts.Baru += 1;
+      else if (item.status === 'Diproses') counts.Diproses += 1;
+      else if (item.status === 'Closed') counts.Closed += 1;
     });
     return counts;
   }, [rawLeads]);
 
   const renderHeader = () => (
-    <View style={styles.topHeader}>
-      <View style={styles.userSection}>
-        <View>
-          <Text style={styles.screenTitle}>Daftar Leads</Text>
-          <Text style={styles.userSubtitle}>
+    <View style={styles.headerWrapper}>
+      {/* Top App Bar with User Profile & Logout */}
+      <View style={styles.topBar}>
+        <View style={styles.userInfo}>
+          <Text style={styles.greetingTitle}>Daftar Prospek (Leads)</Text>
+          <Text style={styles.userEmail} numberOfLines={1}>
             {user?.name ? `${user.name} (${user.email})` : user?.email || 'Sales CRM'}
           </Text>
         </View>
@@ -86,20 +97,21 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
           accessibilityRole="button"
           accessibilityLabel="Logout"
         >
+          <LogOut size={16} color="#DC2626" style={styles.logoutIcon} />
           <Text style={styles.logoutIconText}>Keluar</Text>
         </TouchableOpacity>
       </View>
 
       {/* Search Input */}
       <View style={styles.searchBarContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Cari nama, email, telepon..."
           placeholderTextColor="#9CA3AF"
           value={searchQuery}
           onChangeText={setSearchQuery}
-          clearButtonMode="while-editing"
+          clearButtonMode="never"
           autoCapitalize="none"
           autoCorrect={false}
           testID="input-search-leads"
@@ -109,7 +121,7 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
             onPress={() => setSearchQuery('')}
             style={styles.clearSearchButton}
           >
-            <Text style={styles.clearSearchText}>✕</Text>
+            <X size={16} color="#6B7280" />
           </TouchableOpacity>
         )}
       </View>
@@ -138,7 +150,9 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
     if (error) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>⚠️</Text>
+          <View style={styles.emptyIconCircle}>
+            <AlertTriangle size={36} color="#DC2626" />
+          </View>
           <Text style={styles.emptyTitle}>Terjadi Kesalahan</Text>
           <Text style={styles.emptyMessage}>{error}</Text>
           <Button
@@ -155,7 +169,13 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
 
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>{hasActiveFilter ? '🔎' : '📋'}</Text>
+        <View style={styles.emptyIconCircle}>
+          {hasActiveFilter ? (
+            <SearchX size={36} color="#6B7280" />
+          ) : (
+            <Users size={36} color="#2563EB" />
+          )}
+        </View>
         <Text style={styles.emptyTitle}>
           {hasActiveFilter ? 'Tidak Ada Hasil' : 'Belum Ada Leads'}
         </Text>
@@ -226,7 +246,7 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
           accessibilityLabel="Tambah Lead Baru"
           testID="button-fab-add-lead"
         >
-          <Text style={styles.fabIcon}>+</Text>
+          <Plus size={20} color="#FFFFFF" style={styles.fabIcon} />
           <Text style={styles.fabText}>Tambah Lead</Text>
         </TouchableOpacity>
       ) : null}
@@ -240,54 +260,71 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   listContent: {
-    flexGrow: 1,
     paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingBottom: 90,
   },
-  topHeader: {
+  headerWrapper: {
     paddingTop: 8,
     marginBottom: 8,
   },
-  userSection: {
+  topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  screenTitle: {
-    fontSize: 24,
+  userInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  greetingTitle: {
+    fontSize: 20,
     fontWeight: '800',
     color: '#111827',
   },
-  userSubtitle: {
+  userEmail: {
     fontSize: 13,
     color: '#6B7280',
     marginTop: 2,
   },
   logoutIconButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FEE2E2',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  logoutIcon: {
+    marginRight: 4,
   },
   logoutIconText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#DC2626',
   },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#D1D5DB',
     paddingHorizontal: 12,
     height: 46,
-    marginBottom: 8,
+    marginBottom: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 8,
   },
   searchInput: {
@@ -297,22 +334,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   clearSearchButton: {
-    padding: 4,
-  },
-  clearSearchText: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    fontWeight: '700',
+    padding: 6,
   },
   resultBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    marginTop: 8,
+    marginBottom: 4,
   },
   resultText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#6B7280',
   },
   resultCountBold: {
@@ -325,16 +354,20 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
     paddingHorizontal: 24,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#111827',
     marginBottom: 8,
-    textAlign: 'center',
   },
   emptyMessage: {
     fontSize: 14,
@@ -353,26 +386,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 28,
-    shadowColor: '#1E40AF',
+    borderRadius: 30,
+    shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 6,
   },
   fabIcon: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
     marginRight: 6,
-    lineHeight: 22,
   },
   fabText: {
-    fontSize: 14,
-    fontWeight: '700',
     color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
 

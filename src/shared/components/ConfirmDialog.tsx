@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
 } from 'react-native';
+import { AlertTriangle, AlertCircle, HelpCircle } from 'lucide-react-native';
 import { Button, ButtonVariant } from './Button';
 
 export interface ConfirmDialogProps {
@@ -40,6 +41,28 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isLoading = false,
   testID = 'confirm-dialog',
 }) => {
+  const renderIcon = () => {
+    if (confirmVariant === 'danger') {
+      return (
+        <View style={styles.dangerIconWrapper}>
+          <AlertTriangle size={24} color="#DC2626" />
+        </View>
+      );
+    }
+    if (confirmVariant === 'primary') {
+      return (
+        <View style={styles.primaryIconWrapper}>
+          <AlertCircle size={24} color="#2563EB" />
+        </View>
+      );
+    }
+    return (
+      <View style={styles.defaultIconWrapper}>
+        <HelpCircle size={24} color="#4B5563" />
+      </View>
+    );
+  };
+
   return (
     <Modal
       visible={visible}
@@ -52,7 +75,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <View style={styles.overlay}>
           <TouchableWithoutFeedback>
             <View style={styles.dialogContainer}>
-              <Text style={styles.title}>{title}</Text>
+              <View style={styles.headerRow}>
+                {renderIcon()}
+                <Text style={styles.title}>{title}</Text>
+              </View>
+
               <Text style={styles.message}>{message}</Text>
 
               <View style={styles.buttonRow}>
@@ -104,11 +131,41 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 12,
+  },
+  dangerIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#DBEAFE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  defaultIconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   title: {
     fontSize: 18,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 8,
+    flex: 1,
   },
   message: {
     fontSize: 14,
