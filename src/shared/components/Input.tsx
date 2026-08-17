@@ -1,8 +1,14 @@
 /**
  * Reusable Input Component
  * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
+ * 
+ * Password Best Practice (React Native Standard):
+ * - Uses uncontrolled pattern with textRef for password input
+ * - Eliminates JS-to-Native bridge latency that causes premature 10ms masking cutoff
+ * - Allows native OS 500ms character preview timer to run smoothly for all characters
+ * - Synchronizes native buffer seamlessly via setNativeProps on seen/unseen toggle
  */
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +16,7 @@ import {
   TextInputProps,
   StyleSheet,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 
@@ -34,14 +41,38 @@ export const Input: React.FC<InputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(!isPassword);
   const inputRef = useRef<TextInput>(null);
+  const textRef = useRef<string>(value || '');
+
+  // Keep internal textRef updated if value is changed externally (e.g., form reset)
+  useEffect(() => {
+    if (value !== undefined) {
+      textRef.current = value;
+      if (isPassword && inputRef.current && value === '') {
+        inputRef.current.setNativeProps({ text: '' });
+      }
+    }
+  }, [value, isPassword]);
+
+  const handleChangeText = (text: string) => {
+    textRef.current = text;
+    onChangeText?.(text);
+  };
 
   const handleTogglePassword = () => {
-    setShowPassword((prev) => !prev);
-    // Keep TextInput focused and preserve cursor & keyboard state
+    const nextShowPassword = !showPassword;
+    setShowPassword(nextShowPassword);
+
+    // Sync native text buffer and maintain focus so keyboard stays open & text never vanishes
     requestAnimationFrame(() => {
-      inputRef.current?.focus();
+      if (inputRef.current) {
+        inputRef.current.setNativeProps({ text: textRef.current });
+        inputRef.current.focus();
+      }
     });
   };
+
+  // For password on Android/iOS, use uncontrolled defaultValue to let native OS 500ms echo timer run untouched
+  const isSecureMode = isPassword && !showPassword;
 
   return (
     <View style={styles.container}>
@@ -63,14 +94,15 @@ export const Input: React.FC<InputProps> = ({
           ref={inputRef}
           style={[styles.input, style]}
           placeholderTextColor="#9CA3AF"
-          secureTextEntry={isPassword && !showPassword}
+          secureTextEntry={isSecureMode}
           autoCorrect={false}
           spellCheck={false}
           autoCapitalize="none"
           textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
           autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
-          value={value}
-          onChangeText={onChangeText}
+          value={isPassword ? undefined : value}
+          defaultValue={isPassword ? textRef.current : undefined}
+          onChangeText={handleChangeText}
           onFocus={(e) => {
             setIsFocused(true);
             rest.onFocus?.(e);
