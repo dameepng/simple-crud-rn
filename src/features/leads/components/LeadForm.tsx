@@ -6,7 +6,7 @@
  * - Client-side validation for nama, email, and telepon
  * - Visual loading feedback and disabled states during form submission
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -55,6 +55,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
   isLoading = false,
   onCancel,
 }) => {
+  const scrollViewRef = useRef<ScrollView>(null);
   const [nama, setNama] = useState(initialData?.nama || '');
   const [email, setEmail] = useState(initialData?.email || '');
   const [telepon, setTelepon] = useState(initialData?.telepon || '');
@@ -131,6 +132,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       style={styles.container}
     >
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
@@ -190,6 +192,11 @@ export const LeadForm: React.FC<LeadFormProps> = ({
             onChangeText={(text) => {
               setTelepon(text);
               if (errors.telepon) setErrors((prev) => ({ ...prev, telepon: undefined }));
+            }}
+            onFocus={() => {
+              setTimeout(() => {
+                scrollViewRef.current?.scrollTo({ y: 150, animated: true });
+              }, 150);
             }}
             keyboardType="phone-pad"
             required
@@ -273,12 +280,17 @@ export const LeadForm: React.FC<LeadFormProps> = ({
             </ScrollView>
           </View>
 
-          {/* Catatan Field (Optional) */}
+          {/* Catatan Field (Optional) with auto-scroll to end on focus */}
           <Input
             label="Catatan / Keterangan"
             placeholder="Tambahkan informasi penting mengenai prospek..."
             value={catatan}
             onChangeText={setCatatan}
+            onFocus={() => {
+              setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              }, 150);
+            }}
             multiline
             numberOfLines={4}
             style={styles.notesInput}

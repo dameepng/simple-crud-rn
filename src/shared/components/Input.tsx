@@ -51,8 +51,14 @@ export const Input: React.FC<InputProps> = ({
           style={[styles.input, style]}
           placeholderTextColor="#9CA3AF"
           secureTextEntry={isPassword && !showPassword}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={(e) => {
+            setIsFocused(true);
+            rest.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setIsFocused(false);
+            rest.onBlur?.(e);
+          }}
           editable={editable}
           autoCapitalize="none"
           {...rest}
