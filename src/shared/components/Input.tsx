@@ -34,6 +34,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(!isPassword);
+  const inputRef = useRef<TextInput>(null);
 
   // Stable initial value ref for uncontrolled Android secure mode
   // Prevents re-rendering or resetting defaultValue on every keystroke,
@@ -45,6 +46,14 @@ export const Input: React.FC<InputProps> = ({
       initialValueRef.current = '';
     }
   }, [value]);
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+    // Preserve TextInput focus so the keyboard does not dismiss when toggling visibility
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
 
   const isAndroidSecure = Platform.OS === 'android' && isPassword && !showPassword;
 
@@ -65,7 +74,7 @@ export const Input: React.FC<InputProps> = ({
         ]}
       >
         <TextInput
-          key={isPassword ? `pwd-${showPassword}` : 'regular'}
+          ref={inputRef}
           style={[styles.input, style]}
           placeholderTextColor="#9CA3AF"
           secureTextEntry={isPassword && !showPassword}
@@ -90,7 +99,7 @@ export const Input: React.FC<InputProps> = ({
         />
         {isPassword && (
           <TouchableOpacity
-            onPress={() => setShowPassword((prev) => !prev)}
+            onPress={handleTogglePassword}
             style={styles.eyeButton}
             accessibilityRole="button"
             accessibilityLabel={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
