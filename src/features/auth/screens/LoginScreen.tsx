@@ -1,5 +1,6 @@
 /**
  * Login Screen
+ * Refactored to use Gluestack UI Components (Input, InputField, InputSlot, InputIcon, FormControl, VStack, Heading, Text, Button)
  * PRD Checklist 2.2 & SEC-5, SEC-7:
  * - Email & password credentials input with structured validation
  * - SEC-5: Validates non-empty fields & email format prior to submission
@@ -9,7 +10,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -19,7 +19,21 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../hooks/useAuth';
-import { Input, Button } from '../../../shared/components';
+
+// Gluestack UI Components
+import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import {
+  FormControl,
+  FormControlLabel,
+  FormControlLabelText,
+  FormControlError,
+  FormControlErrorText,
+} from '@/components/ui/form-control';
+import { VStack } from '@/components/ui/vstack';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { Button, ButtonText } from '@/components/ui/button';
+import { EyeIcon, EyeOffIcon } from '@/components/ui/icon';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,8 +47,13 @@ export const LoginScreen: React.FC = () => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   // SEC-5: Client-side validation
   const validateForm = (): boolean => {
@@ -101,7 +120,7 @@ export const LoginScreen: React.FC = () => {
           >
             <View style={styles.headerContainer}>
               <Text style={styles.appName}>CRM Mobile</Text>
-              <Text style={styles.title}>Selamat Datang</Text>
+              <Heading size="2xl" style={styles.title}>Selamat Datang</Heading>
               <Text style={styles.subtitle}>
                 Masuk ke akun Anda untuk mengelola leads dan prospek
               </Text>
@@ -113,51 +132,80 @@ export const LoginScreen: React.FC = () => {
               </View>
             ) : null}
 
-            <View style={styles.formContainer}>
-              <Input
-                label="Email"
-                placeholder="nama@perusahaan.com"
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (errors.email) {
-                    setErrors((prev) => ({ ...prev, email: undefined }));
-                  }
-                }}
-                keyboardType="email-address"
-                autoComplete="email"
-                required
-                error={errors.email}
-                editable={!isSubmitting}
-                testID="input-email"
-              />
+            {/* Gluestack UI Form Container */}
+            <View style={styles.formCard}>
+              <VStack space="lg">
+                {/* Email Field */}
+                <FormControl isInvalid={Boolean(errors.email)} isRequired>
+                  <VStack space="xs">
+                    <FormControlLabel>
+                      <FormControlLabelText>Email</FormControlLabelText>
+                    </FormControlLabel>
+                    <Input isInvalid={Boolean(errors.email)} isDisabled={isSubmitting}>
+                      <InputField
+                        type="text"
+                        placeholder="nama@perusahaan.com"
+                        value={email}
+                        onChangeText={(text) => {
+                          setEmail(text);
+                          if (errors.email) {
+                            setErrors((prev) => ({ ...prev, email: undefined }));
+                          }
+                        }}
+                        keyboardType="email-address"
+                        autoComplete="email"
+                        editable={!isSubmitting}
+                        testID="input-email"
+                      />
+                    </Input>
+                    <FormControlError>
+                      <FormControlErrorText>{errors.email}</FormControlErrorText>
+                    </FormControlError>
+                  </VStack>
+                </FormControl>
 
-              <Input
-                label="Password"
-                placeholder="Masukkan password Anda"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (errors.password) {
-                    setErrors((prev) => ({ ...prev, password: undefined }));
-                  }
-                }}
-                isPassword
-                autoComplete="password"
-                required
-                error={errors.password}
-                editable={!isSubmitting}
-                testID="input-password"
-              />
+                {/* Password Field with Gluestack Input Slot & Icon */}
+                <FormControl isInvalid={Boolean(errors.password)} isRequired>
+                  <VStack space="xs">
+                    <FormControlLabel>
+                      <FormControlLabelText>Password</FormControlLabelText>
+                    </FormControlLabel>
+                    <Input isInvalid={Boolean(errors.password)} isDisabled={isSubmitting}>
+                      <InputField
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Masukkan password Anda"
+                        value={password}
+                        onChangeText={(text) => {
+                          setPassword(text);
+                          if (errors.password) {
+                            setErrors((prev) => ({ ...prev, password: undefined }));
+                          }
+                        }}
+                        autoComplete="password"
+                        editable={!isSubmitting}
+                        testID="input-password"
+                      />
+                      <InputSlot onPress={handleTogglePassword}>
+                        <InputIcon as={showPassword ? EyeIcon : EyeOffIcon} />
+                      </InputSlot>
+                    </Input>
+                    <FormControlError>
+                      <FormControlErrorText>{errors.password}</FormControlErrorText>
+                    </FormControlError>
+                  </VStack>
+                </FormControl>
 
-              <Button
-                title="Masuk"
-                onPress={handleLogin}
-                isLoading={isSubmitting}
-                disabled={isSubmitting}
-                style={styles.submitButton}
-                testID="button-submit-login"
-              />
+                {/* Submit Button */}
+                <Button
+                  onPress={handleLogin}
+                  isLoading={isSubmitting}
+                  disabled={isSubmitting}
+                  style={styles.submitButton}
+                  testID="button-submit-login"
+                >
+                  <ButtonText>Masuk</ButtonText>
+                </Button>
+              </VStack>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -181,21 +229,18 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   headerContainer: {
-    marginBottom: 32,
+    marginBottom: 28,
     alignItems: 'center',
   },
   appName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#2563EB',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -206,7 +251,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     maxWidth: 300,
   },
-  formContainer: {
+  formCard: {
     backgroundColor: '#FFFFFF',
     padding: 24,
     borderRadius: 16,
@@ -219,7 +264,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   submitButton: {
-    marginTop: 8,
+    marginTop: 6,
   },
   errorBanner: {
     backgroundColor: '#FEE2E2',
