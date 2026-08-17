@@ -2,7 +2,7 @@
  * Leads List Screen
  * PRD Checklist 3.4 & FR-5, FR-6, FR-7:
  * - Efficient virtualized FlatList for rendering leads
- * - Debounced search bar and status filter bar integration
+ * - Persistent fixed Search & Filter header (prevents TextInput unmount / keyboard dismiss bug)
  * - Pull to refresh & clear empty / error feedback states
  * - Modern Lucide icons
  */
@@ -81,69 +81,6 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
     return counts;
   }, [rawLeads]);
 
-  const renderHeader = () => (
-    <View style={styles.headerWrapper}>
-      {/* Top App Bar with User Profile & Logout */}
-      <View style={styles.topBar}>
-        <View style={styles.userInfo}>
-          <Text style={styles.greetingTitle}>Daftar Prospek (Leads)</Text>
-          <Text style={styles.userEmail} numberOfLines={1}>
-            {user?.name ? `${user.name} (${user.email})` : user?.email || 'Sales CRM'}
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={logout}
-          style={styles.logoutIconButton}
-          accessibilityRole="button"
-          accessibilityLabel="Logout"
-        >
-          <LogOut size={16} color="#DC2626" style={styles.logoutIcon} />
-          <Text style={styles.logoutIconText}>Keluar</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search Input */}
-      <View style={styles.searchBarContainer}>
-        <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Cari nama, email, telepon..."
-          placeholderTextColor="#9CA3AF"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          clearButtonMode="never"
-          autoCapitalize="none"
-          autoCorrect={false}
-          testID="input-search-leads"
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setSearchQuery('')}
-            style={styles.clearSearchButton}
-          >
-            <X size={16} color="#6B7280" />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Status Filter Chips */}
-      <LeadFilterBar
-        selectedStatus={filterStatus}
-        onSelectStatus={setFilterStatus}
-        statusCounts={statusCounts}
-      />
-
-      {/* Result Count Banner */}
-      <View style={styles.resultBanner}>
-        <Text style={styles.resultText}>
-          Menampilkan <Text style={styles.resultCountBold}>{leads.length}</Text> leads
-          {filterStatus !== 'Semua' ? ` (${filterStatus})` : ''}
-          {debouncedSearchQuery ? ` untuk "${debouncedSearchQuery}"` : ''}
-        </Text>
-      </View>
-    </View>
-  );
-
   const renderEmptyComponent = () => {
     if (isLoading) return null;
 
@@ -207,6 +144,69 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Persistent Fixed Header & Search Bar (Outside FlatList to prevent unmount / keyboard close) */}
+      <View style={styles.headerWrapper}>
+        {/* Top App Bar with User Profile & Logout */}
+        <View style={styles.topBar}>
+          <View style={styles.userInfo}>
+            <Text style={styles.greetingTitle}>Daftar Prospek (Leads)</Text>
+            <Text style={styles.userEmail} numberOfLines={1}>
+              {user?.name ? `${user.name} (${user.email})` : user?.email || 'Sales CRM'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={logout}
+            style={styles.logoutIconButton}
+            accessibilityRole="button"
+            accessibilityLabel="Logout"
+          >
+            <LogOut size={16} color="#DC2626" style={styles.logoutIcon} />
+            <Text style={styles.logoutIconText}>Keluar</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Input */}
+        <View style={styles.searchBarContainer}>
+          <Search size={18} color="#9CA3AF" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari nama, email, telepon..."
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            clearButtonMode="never"
+            autoCapitalize="none"
+            autoCorrect={false}
+            testID="input-search-leads"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              style={styles.clearSearchButton}
+            >
+              <X size={16} color="#6B7280" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Status Filter Chips */}
+        <LeadFilterBar
+          selectedStatus={filterStatus}
+          onSelectStatus={setFilterStatus}
+          statusCounts={statusCounts}
+        />
+
+        {/* Result Count Banner */}
+        <View style={styles.resultBanner}>
+          <Text style={styles.resultText}>
+            Menampilkan <Text style={styles.resultCountBold}>{leads.length}</Text> leads
+            {filterStatus !== 'Semua' ? ` (${filterStatus})` : ''}
+            {debouncedSearchQuery ? ` untuk "${debouncedSearchQuery}"` : ''}
+          </Text>
+        </View>
+      </View>
+
+      {/* Leads FlatList */}
       {isLoading && !isRefreshing && rawLeads.length === 0 ? (
         <LoadingSpinner message="Memuat data leads..." fullScreen />
       ) : (
@@ -216,7 +216,6 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
           renderItem={({ item }) => (
             <LeadCard lead={item} onPress={onSelectLead} />
           )}
-          ListHeaderComponent={renderHeader}
           ListEmptyComponent={renderEmptyComponent}
           contentContainerStyle={styles.listContent}
           keyboardShouldPersistTaps="handled"
@@ -259,20 +258,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
+  headerWrapper: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 6,
+    backgroundColor: '#F9FAFB',
+  },
   listContent: {
     paddingHorizontal: 16,
+    paddingTop: 4,
     paddingBottom: 90,
-  },
-  headerWrapper: {
-    paddingTop: 8,
-    marginBottom: 8,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-    paddingBottom: 12,
+    marginBottom: 14,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
