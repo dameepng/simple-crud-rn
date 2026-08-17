@@ -207,6 +207,21 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
           removeClippedSubviews={true}
         />
       )}
+
+      {/* Floating Action Button (FAB) to Add Lead (FR-9 / Checklist 4.3) */}
+      {onAddNewLead && !isLoading ? (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={onAddNewLead}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Tambah Lead Baru"
+          testID="button-fab-add-lead"
+        >
+          <Text style={styles.fabIcon}>+</Text>
+          <Text style={styles.fabText}>Tambah Lead</Text>
+        </TouchableOpacity>
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -322,6 +337,34 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     minWidth: 160,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    backgroundColor: '#2563EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 28,
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  fabIcon: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginRight: 6,
+    lineHeight: 22,
+  },
+  fabText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });
 
