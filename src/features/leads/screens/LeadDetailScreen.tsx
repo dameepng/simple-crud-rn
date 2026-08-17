@@ -4,7 +4,7 @@
  * - Comprehensive detail view for a single Lead entity
  * - Protected delete workflow requiring explicit user confirmation via ConfirmDialog
  * - Edit trigger and automated list synchronization upon deletion
- * - Modern Lucide icons
+ * - Clean app bar navigation with action buttons on the body
  */
 import React, { useState } from 'react';
 import {
@@ -17,8 +17,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
-  Pencil,
-  Trash2,
   Mail,
   Phone,
   Tag,
@@ -109,16 +107,7 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
           <Text style={styles.backButtonText}>Kembali</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detail Prospek</Text>
-        <TouchableOpacity
-          onPress={() => onEdit(lead)}
-          style={styles.headerEditButton}
-          accessibilityRole="button"
-          accessibilityLabel="Edit lead"
-          testID="button-header-edit"
-        >
-          <Pencil size={16} color="#2563EB" style={styles.headerEditIcon} />
-          <Text style={styles.headerEditText}>Edit</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -267,6 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     paddingRight: 12,
+    width: 80,
   },
   backIcon: {
     marginRight: 4,
@@ -281,19 +271,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111827',
   },
-  headerEditButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingLeft: 12,
-  },
-  headerEditIcon: {
-    marginRight: 4,
-  },
-  headerEditText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#2563EB',
+  headerRightPlaceholder: {
+    width: 80,
   },
   scrollContent: {
     padding: 16,
