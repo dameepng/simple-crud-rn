@@ -2,13 +2,12 @@
  * Reusable Input Component
  * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
  * 
- * Option 2: Instant Custom Bullet Masking Component
- * - Pure instant bullet masking (••••••) with zero character flash
- * - Immediate dot representation on every keystroke
- * - Seamless plain text viewing via eye toggle (Seen/Unseen)
- * - Keyboard & cursor remain stably focused
+ * Secure Native Password Handling:
+ * - Direct native secureTextEntry support (eliminates length-diff assumptions and middle-string edit corruption)
+ * - Dynamic key prop per showPassword state to resolve iOS font reset quirk
+ * - Focus preservation via requestAnimationFrame on toggle
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -33,7 +32,7 @@ export const Input: React.FC<InputProps> = ({
   required = false,
   style,
   editable = true,
-  value = '',
+  value,
   onChangeText,
   ...rest
 }) => {
@@ -41,49 +40,13 @@ export const Input: React.FC<InputProps> = ({
   const [showPassword, setShowPassword] = useState(!isPassword);
   const inputRef = useRef<TextInput>(null);
 
-  // Real internal password value
-  const realPasswordRef = useRef<string>(value);
-
-  // Synchronize external value resets
-  useEffect(() => {
-    realPasswordRef.current = value;
-  }, [value]);
-
-  const handlePasswordTextChange = (inputText: string) => {
-    const prevReal = realPasswordRef.current;
-    let newReal = '';
-
-    const currentLen = prevReal.length;
-
-    if (inputText.length < currentLen) {
-      // User pressed backspace
-      const diff = currentLen - inputText.length;
-      newReal = prevReal.slice(0, Math.max(0, prevReal.length - diff));
-    } else {
-      // User typed character(s)
-      const added = inputText.slice(currentLen);
-      newReal = prevReal + added;
-    }
-
-    realPasswordRef.current = newReal;
-    onChangeText?.(newReal);
-  };
-
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
-    // Keep focus and keyboard open on toggle
+    // Preserve focus and keyboard state across secureTextEntry toggle
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
   };
-
-  // Instant bullet masking when hidden, plain text when visible
-  const activePassword = value || realPasswordRef.current;
-  const displayValue = isPassword
-    ? showPassword
-      ? activePassword
-      : '•'.repeat(activePassword.length)
-    : value;
 
   return (
     <View style={styles.container}>
@@ -103,15 +66,17 @@ export const Input: React.FC<InputProps> = ({
       >
         <TextInput
           ref={inputRef}
+          key={isPassword ? (showPassword ? 'visible' : 'hidden') : 'input'}
           style={[styles.input, style]}
           placeholderTextColor="#9CA3AF"
+          secureTextEntry={isPassword && !showPassword}
           autoCorrect={false}
           spellCheck={false}
           autoCapitalize="none"
           textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
           autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
-          value={displayValue}
-          onChangeText={isPassword ? handlePasswordTextChange : onChangeText}
+          value={value}
+          onChangeText={onChangeText}
           onFocus={(e) => {
             setIsFocused(true);
             rest.onFocus?.(e);
