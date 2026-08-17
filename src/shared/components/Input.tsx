@@ -2,7 +2,7 @@
  * Reusable Input Component
  * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -34,22 +34,18 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(!isPassword);
-  const [internalValue, setInternalValue] = useState(value || '');
+
+  // Stable initial value ref for uncontrolled Android secure mode
+  // Prevents re-rendering or resetting defaultValue on every keystroke,
+  // so Android's native 500ms preview timer runs smoothly for EVERY character typed!
+  const initialValueRef = useRef(value || '');
 
   useEffect(() => {
-    if (value !== undefined && value !== internalValue) {
-      setInternalValue(value);
+    if (value === '') {
+      initialValueRef.current = '';
     }
   }, [value]);
 
-  const handleChangeText = (text: string) => {
-    setInternalValue(text);
-    onChangeText?.(text);
-  };
-
-  // On Android, passing a controlled `value` on every keystroke forces native `setText()`,
-  // which prematurely aborts Android's native 500ms password echo timer.
-  // Using defaultValue for password on Android lets Android's native 500ms timer run smoothly!
   const isAndroidSecure = Platform.OS === 'android' && isPassword && !showPassword;
 
   return (
@@ -78,9 +74,9 @@ export const Input: React.FC<InputProps> = ({
           autoCapitalize="none"
           textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
           autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
-          value={isAndroidSecure ? undefined : internalValue}
-          defaultValue={isAndroidSecure ? internalValue : undefined}
-          onChangeText={handleChangeText}
+          value={isAndroidSecure ? undefined : value}
+          defaultValue={isAndroidSecure ? initialValueRef.current : undefined}
+          onChangeText={onChangeText}
           onFocus={(e) => {
             setIsFocused(true);
             rest.onFocus?.(e);
