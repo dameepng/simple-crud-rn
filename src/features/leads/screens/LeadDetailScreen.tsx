@@ -10,10 +10,10 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, ConfirmDialog, Toast, ToastType } from '../../../shared/components';
 import { formatDate, getStatusBadgeStyle } from '../../../shared/utils';
 import { leadsService } from '../services/leadsService';

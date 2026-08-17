@@ -10,9 +10,9 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LeadForm } from '../components/LeadForm';
 import { leadsService } from '../services/leadsService';
 import { Toast, ToastType } from '../../../shared/components/Toast';
