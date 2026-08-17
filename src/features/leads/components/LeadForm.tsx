@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 140,
+    paddingBottom: 24,
   },
   card: {
     backgroundColor: '#FFFFFF',
