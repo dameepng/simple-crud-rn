@@ -2,10 +2,11 @@
  * Reusable Input Component
  * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
  * 
- * Precision Custom Password Masking Engine:
- * - Guarantees exact 500ms character preview duration for every character
- * - Eliminates Android OS bridge latency and native transformation glitches
- * - Preserves password text & keyboard focus seamlessly during seen/unseen toggles
+ * Option 2: Instant Custom Bullet Masking Component
+ * - Pure instant bullet masking (••••••) with zero character flash
+ * - Immediate dot representation on every keystroke
+ * - Seamless plain text viewing via eye toggle (Seen/Unseen)
+ * - Keyboard & cursor remain stably focused
  */
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -40,86 +41,49 @@ export const Input: React.FC<InputProps> = ({
   const [showPassword, setShowPassword] = useState(!isPassword);
   const inputRef = useRef<TextInput>(null);
 
-  // Precision 500ms Password Masking State
+  // Real internal password value
   const realPasswordRef = useRef<string>(value);
-  const [displayValue, setDisplayValue] = useState<string>(
-    isPassword && !showPassword ? '•'.repeat(value.length) : value
-  );
-  const maskTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync external value changes (e.g. form reset)
+  // Synchronize external value resets
   useEffect(() => {
     realPasswordRef.current = value;
-    if (!isPassword || showPassword) {
-      setDisplayValue(value);
-    } else {
-      setDisplayValue('•'.repeat(value.length));
-    }
-  }, [value, isPassword, showPassword]);
-
-  // Clean up timer on unmount
-  useEffect(() => {
-    return () => {
-      if (maskTimerRef.current) {
-        clearTimeout(maskTimerRef.current);
-      }
-    };
-  }, []);
+  }, [value]);
 
   const handlePasswordTextChange = (inputText: string) => {
     const prevReal = realPasswordRef.current;
     let newReal = '';
 
-    if (inputText.length < displayValue.length) {
+    const currentLen = prevReal.length;
+
+    if (inputText.length < currentLen) {
       // User pressed backspace
-      const diff = displayValue.length - inputText.length;
+      const diff = currentLen - inputText.length;
       newReal = prevReal.slice(0, Math.max(0, prevReal.length - diff));
     } else {
-      // User typed new character(s)
-      const added = inputText.slice(displayValue.length);
+      // User typed character(s)
+      const added = inputText.slice(currentLen);
       newReal = prevReal + added;
     }
 
     realPasswordRef.current = newReal;
     onChangeText?.(newReal);
-
-    if (maskTimerRef.current) {
-      clearTimeout(maskTimerRef.current);
-    }
-
-    if (showPassword) {
-      setDisplayValue(newReal);
-    } else {
-      // Display previous characters as dots '•' and keep the newly typed character visible
-      const lastChar = newReal.slice(-1);
-      const maskedPrefix = '•'.repeat(Math.max(0, newReal.length - 1));
-      setDisplayValue(newReal.length > 0 ? maskedPrefix + lastChar : '');
-
-      // Precision 500ms delay: transform the last character into a dot '•' after exactly 500ms
-      maskTimerRef.current = setTimeout(() => {
-        setDisplayValue('•'.repeat(realPasswordRef.current.length));
-      }, 500);
-    }
   };
 
   const handleTogglePassword = () => {
-    const nextShowPassword = !showPassword;
-    setShowPassword(nextShowPassword);
-
-    if (maskTimerRef.current) {
-      clearTimeout(maskTimerRef.current);
-    }
-
-    if (nextShowPassword) {
-      setDisplayValue(realPasswordRef.current);
-    } else {
-      setDisplayValue('•'.repeat(realPasswordRef.current.length));
-    }
-
+    setShowPassword((prev) => !prev);
+    // Keep focus and keyboard open on toggle
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
   };
+
+  // Instant bullet masking when hidden, plain text when visible
+  const activePassword = value || realPasswordRef.current;
+  const displayValue = isPassword
+    ? showPassword
+      ? activePassword
+      : '•'.repeat(activePassword.length)
+    : value;
 
   return (
     <View style={styles.container}>
@@ -146,7 +110,7 @@ export const Input: React.FC<InputProps> = ({
           autoCapitalize="none"
           textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
           autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
-          value={isPassword ? displayValue : value}
+          value={displayValue}
           onChangeText={isPassword ? handlePasswordTextChange : onChangeText}
           onFocus={(e) => {
             setIsFocused(true);
@@ -154,11 +118,6 @@ export const Input: React.FC<InputProps> = ({
           }}
           onBlur={(e) => {
             setIsFocused(false);
-            // On blur, immediately mask all characters
-            if (isPassword && !showPassword) {
-              if (maskTimerRef.current) clearTimeout(maskTimerRef.current);
-              setDisplayValue('•'.repeat(realPasswordRef.current.length));
-            }
             rest.onBlur?.(e);
           }}
           editable={editable}
