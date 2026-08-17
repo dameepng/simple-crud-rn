@@ -2,7 +2,7 @@
  * Reusable Input Component
  * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   TextInputProps,
   StyleSheet,
   TouchableOpacity,
-  Platform,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 
@@ -36,26 +35,13 @@ export const Input: React.FC<InputProps> = ({
   const [showPassword, setShowPassword] = useState(!isPassword);
   const inputRef = useRef<TextInput>(null);
 
-  // Stable initial value ref for uncontrolled Android secure mode
-  // Prevents re-rendering or resetting defaultValue on every keystroke,
-  // so Android's native 500ms preview timer runs smoothly for EVERY character typed!
-  const initialValueRef = useRef(value || '');
-
-  useEffect(() => {
-    if (value === '') {
-      initialValueRef.current = '';
-    }
-  }, [value]);
-
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
-    // Preserve TextInput focus so the keyboard does not dismiss when toggling visibility
+    // Keep TextInput focused and preserve cursor & keyboard state
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
   };
-
-  const isAndroidSecure = Platform.OS === 'android' && isPassword && !showPassword;
 
   return (
     <View style={styles.container}>
@@ -78,13 +64,12 @@ export const Input: React.FC<InputProps> = ({
           style={[styles.input, style]}
           placeholderTextColor="#9CA3AF"
           secureTextEntry={isPassword && !showPassword}
-          autoCorrect={!isPassword}
-          spellCheck={!isPassword}
+          autoCorrect={false}
+          spellCheck={false}
           autoCapitalize="none"
           textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
           autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
-          value={isAndroidSecure ? undefined : value}
-          defaultValue={isAndroidSecure ? initialValueRef.current : undefined}
+          value={value}
           onChangeText={onChangeText}
           onFocus={(e) => {
             setIsFocused(true);
