@@ -5,7 +5,7 @@
  * - Debounced search bar and status filter bar integration
  * - Pull to refresh & clear empty / error feedback states
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLeads } from '../hooks/useLeads';
 import { LeadCard } from '../components/LeadCard';
 import { LeadFilterBar } from '../components/LeadFilterBar';
@@ -46,6 +47,13 @@ export const LeadsListScreen: React.FC<LeadsListScreenProps> = ({
     refetch,
     debouncedSearchQuery,
   } = useLeads();
+
+  // FR-14: Automatically sync/refresh list when returning from detail/create/edit screen
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   // Compute status counts for filter chips
   const statusCounts = useMemo(() => {
