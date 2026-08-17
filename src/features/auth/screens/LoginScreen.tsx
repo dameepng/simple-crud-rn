@@ -96,6 +96,8 @@ export const LoginScreen: React.FC = () => {
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
+            automaticallyAdjustKeyboardInsets={true}
+            showsVerticalScrollIndicator={false}
           >
             <View style={styles.headerContainer}>
               <Text style={styles.appName}>CRM Mobile</Text>

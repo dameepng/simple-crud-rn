@@ -127,11 +127,14 @@ export const LeadForm: React.FC<LeadFormProps> = ({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
       style={styles.container}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
           {/* Mode Indicator Banner */}
@@ -316,7 +319,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 36,
+    paddingBottom: 140,
   },
   card: {
     backgroundColor: '#FFFFFF',
