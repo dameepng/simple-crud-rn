@@ -4,7 +4,7 @@
  * - Comprehensive detail view for a single Lead entity
  * - Protected delete workflow requiring explicit user confirmation via ConfirmDialog
  * - Edit trigger and automated list synchronization upon deletion
- * - Clean app bar navigation with action buttons on the body
+ * - Clean, icon-only app bar back navigation
  */
 import React, { useState } from 'react';
 import {
@@ -103,8 +103,7 @@ export const LeadDetailScreen: React.FC<LeadDetailScreenProps> = ({
           accessibilityLabel="Kembali ke daftar leads"
           testID="button-detail-back"
         >
-          <ArrowLeft size={20} color="#2563EB" style={styles.backIcon} />
-          <Text style={styles.backButtonText}>Kembali</Text>
+          <ArrowLeft size={22} color="#1E293B" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detail Prospek</Text>
         <View style={styles.headerRightPlaceholder} />
@@ -252,19 +251,11 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   backButton: {
-    flexDirection: 'row',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingRight: 12,
-    width: 80,
-  },
-  backIcon: {
-    marginRight: 4,
-  },
-  backButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#2563EB',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 17,
@@ -272,7 +263,7 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   headerRightPlaceholder: {
-    width: 80,
+    width: 40,
   },
   scrollContent: {
     padding: 16,

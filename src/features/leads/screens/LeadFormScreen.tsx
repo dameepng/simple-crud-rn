@@ -4,7 +4,7 @@
  * - Screen wrapper invoking reusable LeadForm component
  * - Dispatches createLead / updateLead to leadsService based on mode
  * - Provides Toast feedback for success & failure states
- * - Modern Lucide icons
+ * - Clean, icon-only app bar back navigation
  */
 import React, { useState } from 'react';
 import {
@@ -100,13 +100,12 @@ export const LeadFormScreen: React.FC<LeadFormScreenProps> = ({
           accessibilityLabel="Kembali"
           testID="button-header-back"
         >
-          <ArrowLeft size={20} color="#2563EB" style={styles.backIcon} />
-          <Text style={styles.backButtonText}>Kembali</Text>
+          <ArrowLeft size={22} color="#1E293B" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {mode === 'create' ? 'Tambah Lead' : 'Edit Lead'}
         </Text>
-        <View style={styles.placeholderRight} />
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
       {/* Reusable Form */}
@@ -145,26 +144,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   backButton: {
-    flexDirection: 'row',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingRight: 12,
-  },
-  backIcon: {
-    marginRight: 4,
-  },
-  backButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#2563EB',
+    justifyContent: 'center',
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: '700',
     color: '#111827',
   },
-  placeholderRight: {
-    width: 60,
+  headerRightPlaceholder: {
+    width: 40,
   },
 });
 
