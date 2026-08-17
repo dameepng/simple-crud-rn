@@ -2,7 +2,7 @@
  * Reusable Input Component
  * PRD Checklist FASE 2 & SEC-5: Reusable form text input with error validation presentation
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TextInputProps,
   StyleSheet,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 
@@ -27,10 +28,29 @@ export const Input: React.FC<InputProps> = ({
   required = false,
   style,
   editable = true,
+  value,
+  onChangeText,
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(!isPassword);
+  const [internalValue, setInternalValue] = useState(value || '');
+
+  useEffect(() => {
+    if (value !== undefined && value !== internalValue) {
+      setInternalValue(value);
+    }
+  }, [value]);
+
+  const handleChangeText = (text: string) => {
+    setInternalValue(text);
+    onChangeText?.(text);
+  };
+
+  // On Android, passing a controlled `value` on every keystroke forces native `setText()`,
+  // which prematurely aborts Android's native 500ms password echo timer.
+  // Using defaultValue for password on Android lets Android's native 500ms timer run smoothly!
+  const isAndroidSecure = Platform.OS === 'android' && isPassword && !showPassword;
 
   return (
     <View style={styles.container}>
@@ -49,6 +69,7 @@ export const Input: React.FC<InputProps> = ({
         ]}
       >
         <TextInput
+          key={isPassword ? `pwd-${showPassword}` : 'regular'}
           style={[styles.input, style]}
           placeholderTextColor="#9CA3AF"
           secureTextEntry={isPassword && !showPassword}
@@ -57,6 +78,9 @@ export const Input: React.FC<InputProps> = ({
           autoCapitalize="none"
           textContentType={isPassword ? 'password' : rest.textContentType || 'none'}
           autoComplete={isPassword ? 'password' : rest.autoComplete || 'off'}
+          value={isAndroidSecure ? undefined : internalValue}
+          defaultValue={isAndroidSecure ? internalValue : undefined}
+          onChangeText={handleChangeText}
           onFocus={(e) => {
             setIsFocused(true);
             rest.onFocus?.(e);
